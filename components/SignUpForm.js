@@ -3,12 +3,20 @@ import { FontAwesome5, Octicons, MaterialCommunityIcons } from '@expo/vector-ico
 
 import Input from '../components/Input';
 import SubmitButton from '../components/SubmitButton';
+import { validateString } from "../utils/validationConstraints";
 
 const SignUpForm = () => {
 
     const inputChangedHandler = (inputId, inputValue) => {
-        console.log("InputId" + inputId)
-        console.log("InputValue" + inputValue)
+        if (inputId === "firstName" || inputId === "lastName") {
+            console.log(validateString(inputId, inputValue))
+        }
+        else if (inputId === "email") {
+
+        }
+        else if (inputId === "password") {
+
+        }
     }
 
     return (

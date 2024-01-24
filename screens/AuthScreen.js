@@ -10,7 +10,7 @@ import logo from '../assets/images/logo.png';
 const AuthScreen = (props) => {
 
     const [isSignUp, setIsSignUp] = useState(false);
-
+    
     return <SafeAreaView style={{ flex: 1 }}>
         <PageContainer>
             <ScrollView>

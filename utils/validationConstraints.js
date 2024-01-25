@@ -9,7 +9,7 @@ export const validateString = (id, value) => {
         constraints.format = {
             pattern: "[a-z]+",
             flags: "i",
-            message: "name can only contain letters"
+            message: "can only contain letters"
         }
     }
 

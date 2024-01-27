@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { FontAwesome5, Octicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ActivityIndicator, Alert } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import Input from '../components/Input';
 import SubmitButton from '../components/SubmitButton';

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { Octicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Alert } from "react-native";
+import { ActivityIndicator, Alert } from "react-native";
 import { useDispatch } from "react-redux";
 
 import Input from '../components/Input';
@@ -8,6 +8,7 @@ import SubmitButton from '../components/SubmitButton';
 import { validateInput } from "../utils/actions/formActions";
 import { reducer } from "../utils/reducers/formReducer";
 import { signIn } from "../utils/actions/authActions";
+import colors from "../constants/colors";
 
 const initialState = {
     inputValues: {
@@ -76,11 +77,15 @@ const SignInForm = () => {
                     iconPack={Octicons}                     
                     onInputChanged={inputChangedHandler}
                     errorText={formState.inputValidities["password"]}  />
-                <SubmitButton 
-                    title="Sign In" 
-                    onPress={authHandler}
-                    disabled={!formState.formIsValid}
-                    style={{ marginTop: 20 }}  />
+                {           
+                    isLoading ?
+                    <ActivityIndicator size={"small"} color={colors.primary} style={{ marginTop: 10 }}/> :      
+                    <SubmitButton 
+                        title="Sign Up" 
+                        onPress={authHandler}
+                        disabled={!formState.formIsValid}
+                        style={{ marginTop: 20 }}  />
+                }
             </>
     )
 };

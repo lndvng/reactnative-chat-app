@@ -1,8 +1,10 @@
 import { getFirebaseApp } from "../firebaseHelper";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { child, getDatabase, ref, set } from "firebase/database";
 import { authenticate } from "../../store/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { getUserData } from  "./userActions"
 
 export const signUp = (firstName, lastName, email, password) => {
     return async dispatch => {
@@ -30,6 +32,36 @@ export const signUp = (firstName, lastName, email, password) => {
                 message = "This email is already in use";
             }
 
+            throw new Error(message);
+        }
+    }
+}
+
+export const signIn = (email, password) => {
+    return async dispatch => {
+        const app = getFirebaseApp();
+        const auth = getAuth(app);
+
+        try {
+            const result = await signInWithEmailAndPassword(auth, email, password);
+            const { uid, stsTokenManager } = result.user;
+            const { accessToken, expirationTime } = stsTokenManager;
+
+            const expDate = new Date(expirationTime);
+
+            const userData = await getUserData(uid);
+
+            dispatch(authenticate({ token: accessToken, userData }));
+            saveDataToStorage(accessToken, uid, expDate);
+
+        } catch (error) {
+            const errorCode = error.code;
+
+            let message = "Something went wrong.";
+
+            if (errorCode === "auth/invalid-credential") {
+                message = "Username or password is incorrect";
+            }
             throw new Error(message);
         }
     }

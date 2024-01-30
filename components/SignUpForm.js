@@ -10,8 +10,6 @@ import { reducer } from "../utils/reducers/formReducer";
 import { signUp } from "../utils/actions/authActions";
 import colors from "../constants/colors";
 
-
-
 const initialState = {
     inputValues: {
         firstName: "",
@@ -47,7 +45,7 @@ const SignUpForm = () => {
         }
     }, [error])
 
-    const authHandler = async () => {
+    const authHandler = useCallback(async () => {
         try {
             setIsLoading(true);
 
@@ -57,13 +55,13 @@ const SignUpForm = () => {
                 formState.inputValues.email,
                 formState.inputValues.password,
             );
-            dispatch(action);
             setError(null);
+            await dispatch(action);
         } catch (error) {
             setError(error.message);
             setIsLoading(false);
         }
-    }
+    }, [dispatch, formState]);
 
     return (
             <>

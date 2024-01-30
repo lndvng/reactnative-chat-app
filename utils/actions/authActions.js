@@ -1,10 +1,12 @@
 import { getFirebaseApp } from "../firebaseHelper";
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { child, getDatabase, ref, set } from "firebase/database";
-import { authenticate } from "../../store/authSlice";
+import { authenticate, logout } from "../../store/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { getUserData } from  "./userActions"
+import { getUserData } from  "./userActions";
+
+let timer; 
 
 export const signUp = (firstName, lastName, email, password) => {
     return async dispatch => {
@@ -17,11 +19,17 @@ export const signUp = (firstName, lastName, email, password) => {
             const { accessToken, expirationTime } = stsTokenManager;
 
             const expDate = new Date(expirationTime);
+            const timeNow = new Date();
+            const millisecondsUntilExp = expDate - timeNow;
 
             const userData = await createUser(firstName, lastName, email, uid);
 
             dispatch(authenticate({ token: accessToken, userData }));
             saveDataToStorage(accessToken, uid, expDate);
+
+            timer = setTimeout(() => {
+                dispatch(userLogout());
+            }, millisecondsUntilExp);
 
         } catch (error) {
             const errorCode = error.code;
@@ -48,11 +56,17 @@ export const signIn = (email, password) => {
             const { accessToken, expirationTime } = stsTokenManager;
 
             const expDate = new Date(expirationTime);
+            const timeNow = new Date();
+            const millisecondsUntilExp = expDate - timeNow;
 
             const userData = await getUserData(uid);
 
             dispatch(authenticate({ token: accessToken, userData }));
             saveDataToStorage(accessToken, uid, expDate);
+
+            timer = setTimeout(() => {
+                dispatch(userLogout());
+            }, millisecondsUntilExp);
 
         } catch (error) {
             const errorCode = error.code;
@@ -64,6 +78,14 @@ export const signIn = (email, password) => {
             }
             throw new Error(message);
         }
+    }
+}
+
+export const userLogout = () => {
+    return async dispatch => {
+        AsyncStorage.clear();
+        clearTimeout(timer);
+        dispatch(logout());
     }
 }
 

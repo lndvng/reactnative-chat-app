@@ -81,7 +81,7 @@ const SignInForm = () => {
                     isLoading ?
                     <ActivityIndicator size={"small"} color={colors.primary} style={{ marginTop: 10 }}/> :      
                     <SubmitButton 
-                        title="Sign Up" 
+                        title="Sign In" 
                         onPress={authHandler}
                         disabled={!formState.formIsValid}
                         style={{ marginTop: 20 }}  />

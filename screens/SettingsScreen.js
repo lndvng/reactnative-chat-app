@@ -1,6 +1,6 @@
 import React, { useCallback, useReducer, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import PageTitle from '../components/PageTitle';
 import PageContainer from '../components/PageContainer';
@@ -10,8 +10,11 @@ import { reducer } from '../utils/reducers/formReducer';
 import Input from '../components/Input';
 import colors from '../constants/colors';
 import SubmitButton from '../components/SubmitButton';
+import { updateSignedInUserData, userLogout } from '../utils/actions/authActions';
 
 const SettingScreen = (props) => {
+    
+    const dispatch = useDispatch();
 
     const [isLoading, setIsLoading] = useState(false);
     const userData = useSelector(state => state.auth.userData);
@@ -39,8 +42,17 @@ const SettingScreen = (props) => {
         dispatchFormState({ inputId, validationResult: result, inputValue })
     }, [dispatchFormState]);
 
-    const saveHandler = () => {
+    const saveHandler = async () => {
+        const updatedValues = formState.inputValues;
 
+        try {
+            setIsLoading(true);
+            await updateSignedInUserData(userData.userId, updatedValues);
+        } catch (error) {
+
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return <PageContainer style={styles.container}>
@@ -86,13 +98,19 @@ const SettingScreen = (props) => {
 
         {
             isLoading ?
-            <ActivityIndicator size={"small"} color={colors.primary} style={{ marginTop: 10 }} /> :
-            <SubmitButton
-                title="Save"
-                onPress={saveHandler}
-                disabled={!formState.formIsValid}
-                style={{ marginTop: 20 }} />
+                <ActivityIndicator size={"small"} color={colors.primary} style={{ marginTop: 10 }} /> :
+                <SubmitButton
+                    title="Save"
+                    onPress={saveHandler}
+                    disabled={!formState.formIsValid}
+                    style={{ marginTop: 20 }} />
         }
+
+        <SubmitButton
+            title="Logout"
+            onPress={() => dispatch(userLogout())}
+            style={{ marginTop: 20 }}
+            color={colors.red}/>
     </PageContainer>
 };
 

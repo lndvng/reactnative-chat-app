@@ -11,20 +11,27 @@ import Input from '../components/Input';
 import colors from '../constants/colors';
 import SubmitButton from '../components/SubmitButton';
 import { updateSignedInUserData, userLogout } from '../utils/actions/authActions';
+import { updateLoggedInUserData } from '../store/authSlice';
 
 const SettingScreen = (props) => {
-    
+
     const dispatch = useDispatch();
 
     const [isLoading, setIsLoading] = useState(false);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const userData = useSelector(state => state.auth.userData);
+
+    const firstName = userData.firstName || "";
+    const lastName = userData.lastName || "";
+    const email = userData.email || "";
+    const about = userData.about || "";
 
     const initialState = {
         inputValues: {
-            firstName: userData.firstName || "",
-            lastName: userData.lastName || "",
-            email: userData.email || "",
-            about: userData.about || "",
+            firstName,
+            lastName,
+            email,
+            about,
         },
         inputValidities: {
             firstName: undefined,
@@ -42,17 +49,35 @@ const SettingScreen = (props) => {
         dispatchFormState({ inputId, validationResult: result, inputValue })
     }, [dispatchFormState]);
 
-    const saveHandler = async () => {
+    const saveHandler = useCallback(async () => {
         const updatedValues = formState.inputValues;
 
         try {
             setIsLoading(true);
             await updateSignedInUserData(userData.userId, updatedValues);
+            dispatch(updateLoggedInUserData({ newData: updatedValues }));
+
+            setShowSuccessMessage(true);
+
+            // set success message to disappear after 3 seconds 
+            setTimeout(() => {
+                setShowSuccessMessage(false)
+            }, 3000);
         } catch (error) {
 
         } finally {
             setIsLoading(false);
         }
+    }, [formState, dispatch]);
+
+    const hasChanges = () => {
+        const currentValues = formState.inputValues;
+
+        return currentValues.firstName != firstName || 
+        currentValues.lastName != lastName || 
+        currentValues.email != email || 
+        currentValues.about != about;
+
     }
 
     return <PageContainer style={styles.container}>
@@ -95,22 +120,28 @@ const SettingScreen = (props) => {
             onInputChanged={inputChangedHandler}
             errorText={formState.inputValidities["about"]}
             initialValue={userData.about} />
+        <View style={{ marginTop: 20 }}>
+            {
+                showSuccessMessage && <Text>Saved!</Text>
+            }
 
-        {
-            isLoading ?
-                <ActivityIndicator size={"small"} color={colors.primary} style={{ marginTop: 10 }} /> :
-                <SubmitButton
-                    title="Save"
-                    onPress={saveHandler}
-                    disabled={!formState.formIsValid}
-                    style={{ marginTop: 20 }} />
-        }
+            {
+                isLoading ?
+                    <ActivityIndicator size={"small"} color={colors.primary} style={{ marginTop: 10 }} /> :
+                    hasChanges() && <SubmitButton
+                        title="Save"
+                        onPress={saveHandler}
+                        disabled={!formState.formIsValid}
+                        style={{ marginTop: 20 }} />
+            }
+        </View>
 
         <SubmitButton
             title="Logout"
             onPress={() => dispatch(userLogout())}
             style={{ marginTop: 20 }}
-            color={colors.red}/>
+            color={colors.red} />
+
     </PageContainer>
 };
 
